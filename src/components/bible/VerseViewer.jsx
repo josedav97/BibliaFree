@@ -1,10 +1,11 @@
 import { useState, useMemo, useCallback, memo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Copy, Heart, Share2, Volume2, Check, Pause, Play, Pin } from 'lucide-react';
+import { Copy, Heart, Share2, Volume2, Check, Pause, Play, Pin, StopCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import useBibleStore from '../../store/useBibleStore';
 import { useFavorites } from '../../hooks/useFavorites';
 import { useHighlights } from '../../hooks/useHighlights';
+import { useTextToSpeech } from '../../hooks/useTextToSpeech';
 import HighlightToolbar from '../features/HighlightToolbar';
 import ShareModal from '../features/ShareModal';
 
@@ -68,7 +69,8 @@ const VerseViewer = memo(function VerseViewer({ verses, reference, text, highlig
   const { fontSize, toggleReadingMode, readingMode } = useBibleStore();
   const verseContainerRef = useRef(null);
   const { toggleFavorite, isFavorite } = useFavorites();
-  const { addHighlight, getHighlightsForVerse, groupHighlightsByBook } = useHighlights();
+  const { addHighlight, getHighlightsForVerse } = useHighlights();
+  const tts = useTextToSpeech();
   const [copied, setCopied] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const [toolbarVisible, setToolbarVisible] = useState(false);
@@ -106,19 +108,25 @@ const VerseViewer = memo(function VerseViewer({ verses, reference, text, highlig
     });
   }, [toggleFavorite, reference, text, verses]);
 
-  const speakVerse = useCallback(() => {
-    const cleanText = text.replace(/<[^>]*>/g, '');
-    if ('speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance(cleanText);
-      utterance.lang = 'es-MX';
-      utterance.rate = 0.9;
-      speechSynthesis.cancel();
-      speechSynthesis.speak(utterance);
-      toast.success('Reproduciendo audio...');
+  const handleAudio = useCallback(() => {
+    if (tts.isSpeaking && !tts.isPaused) {
+      tts.pause();
+    } else if (tts.isPaused) {
+      tts.resume();
     } else {
-      toast.error('Tu navegador no soporta texto a voz');
+      const cleanText = text.replace(/<[^>]*>/g, '');
+      if ('speechSynthesis' in window) {
+        tts.speak(cleanText);
+        toast.success('Reproduciendo audio...');
+      } else {
+        toast.error('Tu navegador no soporta texto a voz');
+      }
     }
-  }, [text]);
+  }, [text, tts]);
+
+  const handleAudioStop = useCallback(() => {
+    tts.stop();
+  }, [tts]);
 
   const handlePointerUp = useCallback(() => {
     setTimeout(() => {
@@ -248,15 +256,48 @@ const VerseViewer = memo(function VerseViewer({ verses, reference, text, highlig
           </button>
 
           <button
-            onClick={speakVerse}
-            className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium 
-                       transition-all bg-cream-100 dark:bg-dark-bg-100 hover:bg-cream-200 
-                       dark:hover:bg-dark-bg text-brown-100 dark:text-dark-text/60"
-            aria-label="Escuchar versículo"
+            onClick={handleAudio}
+            className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium 
+                       transition-all relative
+                       ${tts.isSpeaking && !tts.isPaused
+                         ? 'bg-gold-50 text-gold dark:bg-dark-accent/10 dark:text-dark-accent ring-2 ring-gold/30 dark:ring-dark-accent/30'
+                         : 'bg-cream-100 dark:bg-dark-bg-100 hover:bg-cream-200 dark:hover:bg-dark-bg text-brown-100 dark:text-dark-text/60'
+                       }`}
+            aria-label={tts.isSpeaking && !tts.isPaused ? 'Pausar audio' : tts.isPaused ? 'Reanudar audio' : 'Reproducir audio'}
           >
-            <Volume2 className="h-3.5 w-3.5" />
-            Audio
+            {tts.isSpeaking && !tts.isPaused ? (
+              <>
+                <span className="relative flex h-3.5 w-3.5 items-center justify-center">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-gold/40 dark:bg-dark-accent/40 opacity-75" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-gold dark:bg-dark-accent" />
+                </span>
+                Pausar
+              </>
+            ) : tts.isPaused ? (
+              <>
+                <Play className="h-3.5 w-3.5" />
+                Reanudar
+              </>
+            ) : (
+              <>
+                <Volume2 className="h-3.5 w-3.5" />
+                Audio
+              </>
+            )}
           </button>
+
+          {(tts.isSpeaking || tts.isPaused) && (
+            <button
+              onClick={handleAudioStop}
+              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium 
+                         transition-all bg-red-50 text-red-500 dark:bg-red-900/20 dark:text-red-400
+                         hover:bg-red-100 dark:hover:bg-red-900/30"
+              aria-label="Detener audio"
+            >
+              <StopCircle className="h-3.5 w-3.5" />
+              Detener
+            </button>
+          )}
 
           <button
             onClick={toggleReadingMode}
