@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { BookOpen, Search, Heart, Sun, Moon, Menu, HeadphonesIcon } from 'lucide-react';
+import { BookOpen, Search, Heart, Sun, Moon, Menu, HeadphonesIcon, Pin } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import useBibleStore from '../../store/useBibleStore';
 import { useState, useEffect, useRef } from 'react';
@@ -28,6 +28,7 @@ export default function Header({ onToggleSidebar }) {
     { to: '/', label: 'Inicio', icon: BookOpen },
     { to: '/search', label: 'Buscar', icon: Search },
     { to: '/favorites', label: 'Favoritos', icon: Heart },
+    { to: '/notes', label: 'Notas', icon: Pin },
   ];
 
   return (

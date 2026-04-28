@@ -13,6 +13,7 @@ const HomePage = lazy(() => import('./pages/HomePage'));
 const SearchPage = lazy(() => import('./pages/SearchPage'));
 const PassagePage = lazy(() => import('./pages/PassagePage'));
 const FavoritesPage = lazy(() => import('./pages/FavoritesPage'));
+const NotesPage = lazy(() => import('./pages/NotesPage'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -75,6 +76,7 @@ export default function App() {
                 <Route path="/search" element={<SearchPage />} />
                 <Route path="/passage/:book/:chapter/:verse?" element={<PassagePage />} />
                 <Route path="/favorites" element={<FavoritesPage />} />
+                <Route path="/notes" element={<NotesPage />} />
               </Routes>
             </Suspense>
           </main>

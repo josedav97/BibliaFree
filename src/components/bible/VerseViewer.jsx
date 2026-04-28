@@ -1,18 +1,83 @@
-import { useState, useMemo, useCallback, memo } from 'react';
+import { useState, useMemo, useCallback, memo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Copy, Heart, Share2, Volume2, Check, Pause, Play } from 'lucide-react';
+import { Copy, Heart, Share2, Volume2, Check, Pause, Play, Pin } from 'lucide-react';
 import toast from 'react-hot-toast';
 import useBibleStore from '../../store/useBibleStore';
 import { useFavorites } from '../../hooks/useFavorites';
-import { useTextToSpeech } from '../../hooks/useTextToSpeech';
+import { useHighlights } from '../../hooks/useHighlights';
+import HighlightToolbar from '../features/HighlightToolbar';
 import ShareModal from '../features/ShareModal';
 
+const highlightBg = {
+  yellow: 'bg-yellow-200/60 dark:bg-yellow-500/20 rounded-sm',
+  green: 'bg-green-200/60 dark:bg-green-500/20 rounded-sm',
+  blue: 'bg-blue-200/60 dark:bg-blue-400/20 rounded-sm',
+  pink: 'bg-pink-200/60 dark:bg-pink-400/20 rounded-sm',
+};
+
+function renderVerseText(verseText, highlights) {
+  if (!verseText || !highlights || highlights.length === 0) {
+    return <>{verseText}</>;
+  }
+
+  const sorted = highlights
+    .filter((h) => h.text && verseText.includes(h.text))
+    .sort((a, b) => verseText.indexOf(a.text) - verseText.indexOf(b.text));
+
+  if (sorted.length === 0) return <>{verseText}</>;
+
+  const segments = [];
+  let lastIndex = 0;
+
+  for (const h of sorted) {
+    const idx = verseText.indexOf(h.text, lastIndex);
+    if (idx === -1) continue;
+
+    if (idx > lastIndex) {
+      segments.push({ text: verseText.slice(lastIndex, idx), color: null });
+    }
+
+    segments.push({ text: h.text, color: h.color, note: h.note });
+    lastIndex = idx + h.text.length;
+  }
+
+  if (lastIndex < verseText.length) {
+    segments.push({ text: verseText.slice(lastIndex), color: null });
+  }
+
+  return (
+    <>
+      {segments.map((seg, i) =>
+        seg.color ? (
+          <span
+            key={i}
+            className={highlightBg[seg.color] || ''}
+            title={seg.note || undefined}
+          >
+            {seg.text}
+          </span>
+        ) : (
+          <span key={i}>{seg.text}</span>
+        )
+      )}
+    </>
+  );
+}
+
 const VerseViewer = memo(function VerseViewer({ verses, reference, text, highlightVerses, showActions = true }) {
-  const { fontSize, toggleReadingMode, readingMode, theme } = useBibleStore();
+  const { fontSize, toggleReadingMode, readingMode } = useBibleStore();
+  const verseContainerRef = useRef(null);
   const { toggleFavorite, isFavorite } = useFavorites();
-  const tts = useTextToSpeech();
+  const { addHighlight, getHighlightsForVerse, groupHighlightsByBook } = useHighlights();
   const [copied, setCopied] = useState(false);
   const [showShare, setShowShare] = useState(false);
+  const [toolbarVisible, setToolbarVisible] = useState(false);
+  const [toolbarText, setToolbarText] = useState('');
+  const [toolbarPosition, setToolbarPosition] = useState({ x: 0, y: 0 });
+  const [activeVerse, setActiveVerse] = useState(null);
+  const [activeBook, setActiveBook] = useState(null);
+  const [activeChapter, setActiveChapter] = useState(null);
+  const [showNote, setShowNote] = useState(null);
 
   const fontSizeClass = useMemo(() => {
     switch (fontSize) {
@@ -43,10 +108,9 @@ const VerseViewer = memo(function VerseViewer({ verses, reference, text, highlig
 
   const speakVerse = useCallback(() => {
     const cleanText = text.replace(/<[^>]*>/g, '');
-    const lang = 'es-MX';
     if ('speechSynthesis' in window) {
       const utterance = new SpeechSynthesisUtterance(cleanText);
-      utterance.lang = lang;
+      utterance.lang = 'es-MX';
       utterance.rate = 0.9;
       speechSynthesis.cancel();
       speechSynthesis.speak(utterance);
@@ -56,10 +120,88 @@ const VerseViewer = memo(function VerseViewer({ verses, reference, text, highlig
     }
   }, [text]);
 
-  const favorited = isFavorite(reference);
+  const handlePointerUp = useCallback(() => {
+    setTimeout(() => {
+      const sel = window.getSelection();
+      if (!sel || sel.isCollapsed) return;
 
+      const selectedText = sel.toString().trim();
+      if (!selectedText) return;
+
+      const range = sel.getRangeAt(0);
+      const container = verseContainerRef.current;
+      if (!container || !container.contains(range.commonAncestorContainer)) {
+        return;
+      }
+
+      let node = range.commonAncestorContainer;
+      let verseNum = null;
+      let bookId = null;
+      let chapterNum = null;
+      while (node && node !== container) {
+        const vNum = node.dataset?.verse;
+        const bId = node.dataset?.bookId;
+        const ch = node.dataset?.chapter;
+        if (vNum) {
+          verseNum = Number(vNum);
+          bookId = bId || null;
+          chapterNum = ch ? Number(ch) : null;
+          break;
+        }
+        node = node.parentElement;
+      }
+
+      if (!verseNum) return;
+
+      try {
+        const rect = range.getBoundingClientRect();
+        const containerRect = container.getBoundingClientRect();
+        const x = rect.left + rect.width / 2 - containerRect.left + (container.scrollLeft || 0);
+        const y = rect.top - containerRect.top + (container.scrollTop || 0);
+
+        setActiveVerse(verseNum);
+        setActiveBook(bookId);
+        setActiveChapter(chapterNum);
+        setToolbarText(selectedText);
+        setToolbarPosition({ x: x - 90, y: y - 52 });
+        setToolbarVisible(true);
+      } catch {
+        // position calculation failed, still show toolbar
+        setActiveVerse(verseNum);
+        setActiveBook(bookId);
+        setActiveChapter(chapterNum);
+        setToolbarText(selectedText);
+        setToolbarVisible(true);
+      }
+    }, 10);
+  }, []);
+
+  const handleHighlight = useCallback(
+    (data) => {
+      if (!activeBook || !activeChapter || !activeVerse || !data.text) return;
+      const fullVerse = verses?.find((v) => v.verse === activeVerse);
+      addHighlight({
+        book: activeBook,
+        chapter: activeChapter,
+        verse: activeVerse,
+        text: data.text,
+        verseText: fullVerse?.text || '',
+        color: data.color,
+        note: data.note,
+      });
+      toast.success('Subrayado guardado');
+      window.getSelection()?.removeAllRanges();
+    },
+    [activeBook, activeChapter, activeVerse, addHighlight, verses]
+  );
+
+  const handleCloseToolbar = useCallback(() => {
+    setToolbarVisible(false);
+    window.getSelection()?.removeAllRanges();
+  }, []);
+
+  const favorited = isFavorite(reference);
   const versesToShow = verses || [];
-  const highlightedRefs = new Set(highlightVerses || []);
 
   return (
     <motion.div
@@ -129,22 +271,73 @@ const VerseViewer = memo(function VerseViewer({ verses, reference, text, highlig
         </div>
       )}
 
-      <div className="rounded-2xl border border-cream-200 bg-white/80 dark:border-dark-bg-100 dark:bg-dark-bg-50/80 p-6 md:p-8 backdrop-blur-sm">
+      <div
+        ref={verseContainerRef}
+        onPointerUp={handlePointerUp}
+        className="rounded-2xl border border-cream-200 bg-white/80 dark:border-dark-bg-100 dark:bg-dark-bg-50/80 p-6 md:p-8 backdrop-blur-sm"
+      >
         <div className={`font-serif text-brown dark:text-dark-text ${fontSizeClass} passage-text`}>
           {versesToShow.map((verse, index) => {
-            const verseRef = `${verse.book_name || ''} ${verse.chapter}:${verse.verse}`;
-            const isHighlighted = highlightedRefs.has(String(verse.verse));
+            const bookId = verse.book_id || '';
+            const chapter = verse.chapter;
+            const verseNum = verse.verse;
+            const verseHighlights = getHighlightsForVerse(bookId, chapter, verseNum);
+            const hasNote = verseHighlights.some((h) => h.note);
+
             return (
               <motion.p
                 key={index}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.03 }}
-                className={`mb-2 transition-colors duration-200 px-2 py-1 rounded
-                  ${isHighlighted ? 'verse-highlight' : 'hover:bg-cream-100/50 dark:hover:bg-dark-bg/50'}`}
+                className="mb-2 transition-colors duration-200 px-2 py-1 rounded
+                  hover:bg-cream-100/50 dark:hover:bg-dark-bg/50 passage-text relative"
               >
-                <sup className="text-gold dark:text-dark-accent mr-1">{verse.verse}</sup>
-                {verse.text}
+                <sup
+                  className="text-gold dark:text-dark-accent mr-1"
+                  data-verse={verseNum}
+                  data-book-id={bookId}
+                  data-chapter={chapter}
+                >
+                  {verseNum}
+                </sup>
+                <span
+                  data-verse={verseNum}
+                  data-book-id={bookId}
+                  data-chapter={chapter}
+                >
+                  {renderVerseText(verse.text, verseHighlights)}
+                </span>
+                {hasNote && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowNote(showNote === verseNum ? null : verseNum);
+                    }}
+                    className="inline-flex items-center ml-2 text-gold hover:text-gold-400 
+                               dark:text-dark-accent dark:hover:text-dark-accent/80 
+                               transition-colors align-middle"
+                    aria-label="Ver nota"
+                  >
+                    <Pin className="h-3.5 w-3.5" />
+                  </button>
+                )}
+                {showNote === verseNum && hasNote && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="ml-8 mt-1 p-2.5 rounded-lg bg-gold-50 dark:bg-dark-accent/10 
+                               border border-gold-100 dark:border-dark-accent/20"
+                  >
+                    {verseHighlights
+                      .filter((h) => h.note)
+                      .map((h, i) => (
+                        <p key={i} className="text-xs text-brown-100 dark:text-dark-text/70 font-sans leading-relaxed">
+                          {h.note}
+                        </p>
+                      ))}
+                  </motion.div>
+                )}
               </motion.p>
             );
           })}
@@ -179,6 +372,15 @@ const VerseViewer = memo(function VerseViewer({ verses, reference, text, highlig
           />
         )}
       </AnimatePresence>
+
+      {toolbarVisible && (
+        <HighlightToolbar
+          selectedText={toolbarText}
+          position={toolbarPosition}
+          onHighlight={handleHighlight}
+          onClose={handleCloseToolbar}
+        />
+      )}
     </motion.div>
   );
 });

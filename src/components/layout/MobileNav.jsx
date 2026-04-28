@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { BookOpen, Search, Heart, X } from 'lucide-react';
+import { BookOpen, Search, Heart, Pin, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function MobileNav({ isOpen, onClose }) {
@@ -9,6 +9,7 @@ export default function MobileNav({ isOpen, onClose }) {
     { to: '/', label: 'Inicio', icon: BookOpen },
     { to: '/search', label: 'Buscar', icon: Search },
     { to: '/favorites', label: 'Favoritos', icon: Heart },
+    { to: '/notes', label: 'Notas', icon: Pin },
   ];
 
   return (
