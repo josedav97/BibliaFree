@@ -32,7 +32,13 @@ const VerseViewer = memo(function VerseViewer({ verses, reference, text, highlig
   }, [text, reference]);
 
   const handleFavorite = useCallback(() => {
-    toggleFavorite({ reference, text, book: verses?.[0]?.book_name, chapter: verses?.[0]?.chapter });
+    toggleFavorite({
+      reference,
+      text,
+      bookId: verses?.[0]?.book_id,
+      book: verses?.[0]?.book_name,
+      chapter: verses?.[0]?.chapter,
+    });
   }, [toggleFavorite, reference, text, verses]);
 
   const speakVerse = useCallback(() => {

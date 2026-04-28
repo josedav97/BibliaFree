@@ -17,7 +17,10 @@ export default function PassagePage() {
   const addToHistory = useBibleStore((state) => state.addToHistory);
   const fontSize = useBibleStore((state) => state.fontSize);
 
-  const decodedBook = book?.toLowerCase();
+  const rawBook = book?.toLowerCase();
+  const decodedBook = rawBook
+    ? rawBook.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    : null;
   const chapterNum = parseInt(chapter, 10);
   const verseNum = verse ? parseInt(verse, 10) : null;
 

@@ -116,9 +116,17 @@ export default function FavoritesList() {
 
   const handleNavigate = useCallback(
     (fav) => {
+      let book;
+      if (fav.bookId) {
+        book = fav.bookId.toLowerCase();
+      } else {
+        const parts = fav.reference.split(' ');
+        book = parts.slice(0, -1).join(' ').toLowerCase();
+        book = book.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      }
+
       const parts = fav.reference.split(' ');
       const chapterVerse = parts[parts.length - 1];
-      const book = parts.slice(0, -1).join(' ').toLowerCase();
       const [chapter, verse] = chapterVerse.includes(':')
         ? chapterVerse.split(':')
         : [chapterVerse, null];
