@@ -284,45 +284,50 @@ export function getVerseOfDay() {
 function parseChapterResponse(data, bookId) {
   if (!data || !data.vers) return null;
   const displayName = formatBookName(bookId);
+  const ch = Math.round(Number(data.chapter));
   return {
-    reference: `${displayName} ${data.chapter}`,
+    reference: `${displayName} ${ch}`,
     text: data.vers.map((v) => v.verse).join(' '),
     verses: data.vers.map((v) => ({
       book_name: displayName,
       book_id: bookId,
-      chapter: data.chapter,
-      verse: v.number,
+      chapter: ch,
+      verse: Math.round(Number(v.number)),
       text: v.verse,
     })),
     translation_name: 'Reina Valera 1960',
     translation: 'rv1960',
     book: displayName,
-    chapter: data.chapter,
+    chapter: ch,
   };
 }
 
 function parseVerseResponse(data, bookId, chapter) {
   const displayName = formatBookName(bookId);
+  const ch = Math.round(Number(chapter));
   const verses = Array.isArray(data) ? data : [data];
 
   if (!verses.length || !verses[0].verse) return null;
 
+  const firstVerse = Math.round(Number(verses[0].number));
+  const lastVerse = Math.round(Number(verses[verses.length - 1].number));
+
   return {
     reference: verses.length === 1
-      ? `${displayName} ${chapter}:${verses[0].number}`
-      : `${displayName} ${chapter}:${verses[0].number}-${verses[verses.length - 1].number}`,
+      ? `${displayName} ${ch}:${firstVerse}`
+      : `${displayName} ${ch}:${firstVerse}-${lastVerse}`,
     text: verses.map((v) => v.verse).join(' '),
     verses: verses.map((v) => ({
       book_name: displayName,
       book_id: bookId,
-      chapter,
-      verse: v.number,
+      chapter: ch,
+      verse: Math.round(Number(v.number)),
       text: v.verse,
     })),
     translation_name: 'Reina Valera 1960',
     translation: 'rv1960',
     book: displayName,
-    chapter,
+    chapter: ch,
   };
 }
 

@@ -376,7 +376,7 @@ const VerseViewer = memo(function VerseViewer({ verses, reference, text, highlig
                   data-book-id={bookId}
                   data-chapter={chapter}
                 >
-                  {verseNum}
+                  {String(verseNum)}
                 </sup>
                 <span
                   data-verse={verseNum}

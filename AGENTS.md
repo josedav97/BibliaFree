@@ -62,9 +62,10 @@ src/
 - `bible-favorites` — `[{ reference, text, bookId, book, chapter, note?, savedAt }]`
 - `bible-highlights` — `[{ id, book, chapter, verse, text, verseText, color, note, createdAt }]`
 
-### Dark mode
-- Tailwind v4 dark mode via `.dark` class on `<html>` (no `darkMode: 'class'` config needed)
-- Toggled by Zustand `toggleTheme()` → `document.documentElement.classList.toggle('dark')`
+### Dark mode (only — no light theme)
+- App is dark-only: `document.documentElement.classList.add('dark')` on mount in `App.jsx`
+- No theme toggle in UI; `toggleTheme` removed from Zustand store
+- All Tailwind `dark:` variants always active since `.dark` is always on `<html>`
 
 ### Theme colors (light)
 - Background: `cream` (#FFF8F0), Text: `brown` (#1A1A1A), Secondary text: `brown-100` (#4A3728)
