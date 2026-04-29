@@ -1,7 +1,6 @@
 import { lazy, Suspense, useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AnimatePresence } from 'framer-motion';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import MobileNav from './components/layout/MobileNav';
@@ -35,19 +34,14 @@ function PageLoader() {
 
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const theme = useBibleStore((state) => state.theme);
   const readingMode = useBibleStore((state) => state.readingMode);
 
   useEffect(() => {
-    document.documentElement.classList.toggle('dark', theme === 'dark');
-  }, [theme]);
+    document.documentElement.classList.add('dark');
+  }, []);
 
   useEffect(() => {
     function handleKeyDown(e) {
-      if (e.ctrlKey && e.shiftKey && e.key === 'D') {
-        e.preventDefault();
-        useBibleStore.getState().toggleTheme();
-      }
       if (e.key === 'Escape') {
         setSidebarOpen(false);
       }
@@ -59,12 +53,7 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <div className={`min-h-screen flex flex-col transition-colors duration-300 
-          ${theme === 'dark' ? 'dark' : ''}
-          ${theme === 'light'
-            ? 'bg-cream text-brown'
-            : 'bg-dark-bg text-dark-text'
-          }`}>
+        <div className="min-h-screen flex flex-col transition-colors duration-300 dark bg-dark-bg text-dark-text">
           <Header onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
 
           <MobileNav isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />

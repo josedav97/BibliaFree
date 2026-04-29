@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { BookOpen, Search, Heart, Sun, Moon, Menu, Type, Pin } from 'lucide-react';
+import { BookOpen, Search, Heart, Menu, Type, Pin } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import useBibleStore from '../../store/useBibleStore';
 import { useState, useEffect, useRef } from 'react';
@@ -7,7 +7,7 @@ import { useState, useEffect, useRef } from 'react';
 const fontSizeLabels = { small: 'Pequeño', medium: 'Mediano', large: 'Grande' };
 
 export default function Header({ onToggleSidebar }) {
-  const { theme, toggleTheme, fontSize, setFontSize, readingMode } = useBibleStore();
+  const { fontSize, setFontSize, readingMode } = useBibleStore();
   const location = useLocation();
   const [fontMenuOpen, setFontMenuOpen] = useState(false);
   const fontRef = useRef(null);
@@ -82,25 +82,6 @@ export default function Header({ onToggleSidebar }) {
         </nav>
 
         <div className="flex items-center gap-1">
-          <button
-            onClick={toggleTheme}
-            className="rounded-lg p-2 text-brown-100 transition-colors hover:bg-cream-200 
-                       dark:text-dark-text/60 dark:hover:bg-dark-bg-50"
-            aria-label={theme === 'light' ? 'Activar modo oscuro' : 'Activar modo claro'}
-          >
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                key={theme}
-                initial={{ rotate: -90, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                exit={{ rotate: 90, opacity: 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
-              </motion.div>
-            </AnimatePresence>
-          </button>
-
           <div className="relative" ref={fontRef}>
             <button
               onClick={() => setFontMenuOpen(!fontMenuOpen)}
