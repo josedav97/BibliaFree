@@ -3,11 +3,13 @@ import { BookOpen, Search, Heart, Menu, Type, Pin } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import useBibleStore from '../../store/useBibleStore';
 import { useState, useEffect, useRef } from 'react';
+import { usePWAInstall } from '../../hooks/usePWAInstall';
 
 const fontSizeLabels = { small: 'Pequeño', medium: 'Mediano', large: 'Grande' };
 
 export default function Header({ onToggleSidebar }) {
   const { fontSize, setFontSize, readingMode } = useBibleStore();
+  const pwa = usePWAInstall();
   const location = useLocation();
   const [fontMenuOpen, setFontMenuOpen] = useState(false);
   const fontRef = useRef(null);
@@ -82,6 +84,19 @@ export default function Header({ onToggleSidebar }) {
         </nav>
 
         <div className="flex items-center gap-1">
+          <button
+            onClick={pwa.install}
+            className="rounded-lg p-2 text-brown-100 transition-colors hover:bg-cream-200 
+                       dark:text-dark-text/60 dark:hover:bg-dark-bg-50 flex items-center gap-1.5"
+            aria-label={pwa.label}
+            title={pwa.installed ? 'App instalada' : pwa.available ? 'Instalar app' : 'Compartir'}
+          >
+            <pwa.Icon className="h-4 w-4" />
+            <span className="hidden sm:inline text-xs font-medium">
+              {pwa.installed ? 'Instalada' : pwa.available ? 'Instalar' : 'Compartir'}
+            </span>
+          </button>
+
           <div className="relative" ref={fontRef}>
             <button
               onClick={() => setFontMenuOpen(!fontMenuOpen)}

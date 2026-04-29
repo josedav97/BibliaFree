@@ -1,9 +1,11 @@
 import { Link, useLocation } from 'react-router-dom';
 import { BookOpen, Search, Heart, Pin, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { usePWAInstall } from '../../hooks/usePWAInstall';
 
 export default function MobileNav({ isOpen, onClose }) {
   const location = useLocation();
+  const pwa = usePWAInstall();
 
   const links = [
     { to: '/', label: 'Inicio', icon: BookOpen },
@@ -73,6 +75,17 @@ export default function MobileNav({ isOpen, onClose }) {
                   </Link>
                 );
               })}
+
+              <button
+                onClick={pwa.install}
+                className="flex items-center gap-3 rounded-lg px-4 py-3 mb-1 w-full text-sm font-medium 
+                           transition-colors text-brown-100 hover:bg-cream-200 
+                           dark:text-dark-text/60 dark:hover:bg-dark-bg-50 text-left"
+                aria-label={pwa.label}
+              >
+                <pwa.Icon className="h-5 w-5" />
+                {pwa.installed ? 'App instalada ✓' : pwa.available ? 'Instalar app' : 'Compartir app'}
+              </button>
             </nav>
 
             <div className="absolute bottom-0 left-0 right-0 border-t border-cream-200 dark:border-dark-bg-100 p-4">
