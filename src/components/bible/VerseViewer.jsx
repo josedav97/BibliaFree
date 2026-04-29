@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, memo, useRef } from 'react';
+import { useState, useMemo, useCallback, memo, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Copy, Heart, Share2, Volume2, Check, Pause, Play, Pin, StopCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -128,6 +128,8 @@ const VerseViewer = memo(function VerseViewer({ verses, reference, text, highlig
     tts.stop();
   }, [tts]);
 
+  const toolbarRef = useRef(null);
+
   const handlePointerUp = useCallback(() => {
     setTimeout(() => {
       const sel = window.getSelection();
@@ -163,18 +165,31 @@ const VerseViewer = memo(function VerseViewer({ verses, reference, text, highlig
 
       try {
         const rect = range.getBoundingClientRect();
-        const containerRect = container.getBoundingClientRect();
-        const x = rect.left + rect.width / 2 - containerRect.left + (container.scrollLeft || 0);
-        const y = rect.top - containerRect.top + (container.scrollTop || 0);
+        const toolbarW = 190;
+        const toolbarH = 40;
+        const gap = 8;
+        const margin = 8;
+
+        let x = rect.left + rect.width / 2 - toolbarW / 2;
+
+        x = Math.max(margin, Math.min(x, window.innerWidth - toolbarW - margin));
+
+        let y = rect.top - toolbarH - gap;
+
+        if (y < margin) {
+          y = rect.bottom + gap;
+        }
+        if (y + toolbarH > window.innerHeight - margin) {
+          y = Math.max(margin, rect.top - toolbarH - gap);
+        }
 
         setActiveVerse(verseNum);
         setActiveBook(bookId);
         setActiveChapter(chapterNum);
         setToolbarText(selectedText);
-        setToolbarPosition({ x: x - 90, y: y - 52 });
+        setToolbarPosition({ x, y });
         setToolbarVisible(true);
       } catch {
-        // position calculation failed, still show toolbar
         setActiveVerse(verseNum);
         setActiveBook(bookId);
         setActiveChapter(chapterNum);
@@ -183,6 +198,27 @@ const VerseViewer = memo(function VerseViewer({ verses, reference, text, highlig
       }
     }, 10);
   }, []);
+
+  useEffect(() => {
+    if (!toolbarVisible) return;
+
+    const handleOutside = (e) => {
+      const target = e.target;
+      if (toolbarRef.current && toolbarRef.current.contains(target)) return;
+      if (verseContainerRef.current && verseContainerRef.current.contains(target)) return;
+      setToolbarVisible(false);
+      window.getSelection()?.removeAllRanges();
+    };
+
+    const timer = setTimeout(() => {
+      document.addEventListener('mousedown', handleOutside);
+    }, 300);
+
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('mousedown', handleOutside);
+    };
+  }, [toolbarVisible]);
 
   const handleHighlight = useCallback(
     (data) => {
@@ -415,12 +451,14 @@ const VerseViewer = memo(function VerseViewer({ verses, reference, text, highlig
       </AnimatePresence>
 
       {toolbarVisible && (
-        <HighlightToolbar
-          selectedText={toolbarText}
-          position={toolbarPosition}
-          onHighlight={handleHighlight}
-          onClose={handleCloseToolbar}
-        />
+        <div ref={toolbarRef}>
+          <HighlightToolbar
+            selectedText={toolbarText}
+            position={toolbarPosition}
+            onHighlight={handleHighlight}
+            onClose={handleCloseToolbar}
+          />
+        </div>
       )}
     </motion.div>
   );

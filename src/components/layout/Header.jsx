@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { BookOpen, Search, Heart, Sun, Moon, Menu, HeadphonesIcon, Pin } from 'lucide-react';
+import { BookOpen, Search, Heart, Sun, Moon, Menu, Type, Pin } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import useBibleStore from '../../store/useBibleStore';
 import { useState, useEffect, useRef } from 'react';
@@ -110,7 +110,7 @@ export default function Header({ onToggleSidebar }) {
               aria-expanded={fontMenuOpen}
               aria-haspopup="true"
             >
-              <HeadphonesIcon className="h-5 w-5" />
+              <Type className="h-5 w-5" />
             </button>
 
             <AnimatePresence>
