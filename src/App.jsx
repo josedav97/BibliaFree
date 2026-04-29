@@ -5,6 +5,7 @@ import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import MobileNav from './components/layout/MobileNav';
 import ToastProvider from './components/ui/Toast';
+import InstallPWAButton from './components/features/InstallPWAButton';
 import useBibleStore from './store/useBibleStore';
 import SkeletonLoader from './components/ui/SkeletonLoader';
 
@@ -74,6 +75,7 @@ export default function App() {
           {!readingMode && <Footer />}
 
           <ToastProvider />
+          <InstallPWAButton />
         </div>
       </HashRouter>
     </QueryClientProvider>

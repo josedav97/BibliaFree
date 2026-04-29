@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" fill="none">
+  <rect width="512" height="512" rx="84" fill="#1A1A2E"/>
+  <path d="M144 104h132c22 0 44 11 44 33v262c0-22-22-33-44-33H144c-22 0-33 11-33 33V137c0-22 11-33 33-33z" fill="none" stroke="#D4AF37" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M276 104h92c22 0 44 11 44 33v262c0-22-22-33-44-33h-92" fill="none" stroke="#D4AF37" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="276" y1="144" x2="276" y2="368" stroke="#D4AF37" stroke-width="10" stroke-linecap="round"/>
+  <line x1="310" y1="170" x2="360" y2="170" stroke="#D4AF37" stroke-width="8" stroke-linecap="round" opacity="0.5"/>
+  <line x1="310" y1="215" x2="370" y2="215" stroke="#D4AF37" stroke-width="8" stroke-linecap="round" opacity="0.5"/>
+  <line x1="310" y1="260" x2="345" y2="260" stroke="#D4AF37" stroke-width="8" stroke-linecap="round" opacity="0.5"/>
+  <circle cx="210" cy="284" r="54" fill="none" stroke="#D4AF37" stroke-width="6" opacity="0.6"/>
+  <line x1="246" y1="320" x2="278" y2="352" stroke="#D4AF37" stroke-width="8" stroke-linecap="round" opacity="0.6"/>
+</svg>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192" fill="none">
+  <rect width="192" height="192" rx="32" fill="#1A1A2E"/>
+  <path d="M56 40h48c8 0 16 4 16 12v96c0-8-8-12-16-12H56c-8 0-12 4-12 12V52c0-8 4-12 12-12z" fill="none" stroke="#D4AF37" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M104 40h32c8 0 16 4 16 12v96c0-8-8-12-16-12h-32" fill="none" stroke="#D4AF37" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="104" y1="56" x2="104" y2="136" stroke="#D4AF37" stroke-width="4" stroke-linecap="round"/>
+  <line x1="116" y1="64" x2="132" y2="64" stroke="#D4AF37" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
+  <line x1="116" y1="80" x2="136" y2="80" stroke="#D4AF37" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
+  <line x1="116" y1="96" x2="128" y2="96" stroke="#D4AF37" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
+  <circle cx="80" cy="104" r="20" fill="none" stroke="#D4AF37" stroke-width="2" opacity="0.6"/>
+  <line x1="92" y1="116" x2="104" y2="128" stroke="#D4AF37" stroke-width="3" stroke-linecap="round" opacity="0.6"/>
+</svg>
