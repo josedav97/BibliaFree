@@ -8,23 +8,33 @@ const ASSETS = [
 ];
 
 self.addEventListener('install', (event) => {
+  console.log('[SW] Install event');
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS);
+      console.log('[SW] Caching assets:', ASSETS);
+      return cache.addAll(ASSETS).then(() => {
+        console.log('[SW] All assets cached');
+      }).catch((err) => {
+        console.warn('[SW] Cache addAll error (non-fatal):', err);
+      });
     })
   );
   self.skipWaiting();
+  console.log('[SW] Skip waiting');
 });
 
 self.addEventListener('activate', (event) => {
+  console.log('[SW] Activate event');
   event.waitUntil(
     caches.keys().then((keys) => {
+      console.log('[SW] Clearing old caches:', keys);
       return Promise.all(
         keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
       );
     })
   );
   self.clients.claim();
+  console.log('[SW] Clients claimed');
 });
 
 self.addEventListener('fetch', (event) => {
