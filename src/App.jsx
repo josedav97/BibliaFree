@@ -1,5 +1,5 @@
 import { lazy, Suspense, useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
@@ -52,7 +52,7 @@ export default function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
+      <HashRouter>
         <div className="min-h-screen flex flex-col transition-colors duration-300 dark bg-dark-bg text-dark-text">
           <Header onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
 
@@ -74,7 +74,7 @@ export default function App() {
 
           <ToastProvider />
         </div>
-      </BrowserRouter>
+      </HashRouter>
     </QueryClientProvider>
   );
 }

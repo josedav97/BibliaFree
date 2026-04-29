@@ -4,6 +4,7 @@
 - `npm run dev` — start dev server (HMR)
 - `npm run build` — production build (Vite)
 - `npm run preview` — preview production build
+- `npm run deploy` — build + deploy to GitHub Pages (`gh-pages` branch)
 - `npm run lint` — ESLint
 
 ## Tech Stack
