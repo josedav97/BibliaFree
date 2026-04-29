@@ -105,10 +105,10 @@ export default function HomePage() {
               whileHover={{ y: -2 }}
               whileTap={{ scale: 0.97 }}
               onClick={() => handleBookClick(book.id)}
-              className="flex items-center gap-3 rounded-xl border border-cream-200 
-                         bg-white/80 dark:border-dark-bg-100 dark:bg-dark-bg-50/80 
+              className="flex items-center gap-3 rounded-xl border border-dark-bg-100 
+                         bg-dark-bg-50/70 backdrop-blur-sm
                          p-4 text-left shadow-sm transition-all hover:shadow-md
-                         hover:border-gold/30 dark:hover:border-dark-accent/30 group"
+                         hover:border-dark-accent/30 group"
             >
               <BookOpen className="h-5 w-5 text-gold dark:text-dark-accent 
                                   group-hover:scale-110 transition-transform" />

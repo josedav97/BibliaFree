@@ -53,7 +53,8 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <HashRouter>
-        <div className="min-h-screen flex flex-col transition-colors duration-300 dark bg-dark-bg text-dark-text">
+        <div className="min-h-screen flex flex-col bg-dark-bg text-dark-text"
+             style={{ textShadow: '0 1px 2px rgba(0,0,0,0.4)' }}>
           <Header onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
 
           <MobileNav isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
